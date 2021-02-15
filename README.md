@@ -38,7 +38,7 @@ Foi desenvolvido um diagrama de relações entre as classes:
 
 O padrão definido para as requisições foi o seguinte:
 
-`Cabeçalho;Token;Payload;
+`Cabeçalho;Token;Payload;`
 
 O cabeçalho das requisições segue um padrão `Identificador:Status`. O identificador é utilizado para determinar o que o servidor deve fazer, como `createRoom`, por exemplo. Foi utilizado também um campo de token, gerado aleatóriamente, para tratar de requisições duplicadas que ocorriam na rede e informar o cliente quando sua requisição foi finalizada (o cliente verifica se uma requisição de mesmo identificador e mesmo token com o estado success ou fail foi disparada pelo servidor)
 
