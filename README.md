@@ -2,7 +2,7 @@
 ## Desenvolvimento de Aplicações Móveis e Distribuídas
 ### Aluno: Lucas A. Gusmão
 
-
+![image](https://user-images.githubusercontent.com/35220979/107996223-a35a3700-6fbe-11eb-8d4a-3912a9d1632f.png)
 > Figura 1: Janela de chat
 
 # 1. Introdução
@@ -30,7 +30,9 @@ Como foi mencionado na introdução, a comunicação da aplicação ocorre pelo 
 
 Foi desenvolvido um diagrama de relações entre as classes:
 
+![classDiagram](https://user-images.githubusercontent.com/35220979/107996226-a6552780-6fbe-11eb-95ab-ebdf94be7aa6.png)
 
+> Figura 2: Diagrama de Classes
 
 ## 3.2 Padrão das Requisições
 
