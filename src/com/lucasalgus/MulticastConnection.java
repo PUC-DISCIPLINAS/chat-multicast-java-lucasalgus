@@ -6,7 +6,6 @@ import com.lucasalgus.utils.MessageUtils;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.Observer;
 
 public class MulticastConnection extends Thread {
 	private MulticastSocket socket;

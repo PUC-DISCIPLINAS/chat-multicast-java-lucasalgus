@@ -80,7 +80,7 @@ public class RoomsWindow {
             ClientController.createRoom(success -> {
                 if (success) {
                     JOptionPane.showMessageDialog(frame,
-                            "Sala criada com sucesso! Clique no botão 'Atualizar Lista' para visualiza-la.",
+                            "Sala criada com sucesso!",
                             "Sucesso!",
                             JOptionPane.INFORMATION_MESSAGE
                     );
