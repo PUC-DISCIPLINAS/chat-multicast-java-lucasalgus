@@ -2,10 +2,12 @@ package com.lucasalgus;
 
 import com.lucasalgus.model.Room;
 import java.util.Arrays;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 
 public class Main {
+    static Scanner sc = new Scanner(System.in);
     static int roomId = 0;
     static MulticastConnection socket;
 
@@ -14,8 +16,11 @@ public class Main {
     public static void main(String[] args) {
         rooms = new ArrayList<>();
 
+        System.out.println("Digite o endereço de IP para ser usado como servidor do chat:");
+        var address = sc.nextLine();
+
         try {
-            socket = new MulticastConnection("228.5.6.7:6789");
+            socket = new MulticastConnection(address);
 
             socket.listen((String message) -> {
                 System.out.println(message);
@@ -67,7 +72,7 @@ public class Main {
         roomId++;
 
         rooms.add(room);
-        socket.sendMessage("createRoom:success;" + requestToken + ";");
+        socket.sendMessage("createRoom:success;" + requestToken + ";" + room.getId() + ";");
     }
 
     public static void showRooms(String[] requestVars) throws Exception {
@@ -96,7 +101,7 @@ public class Main {
 
         if (!userExists) {
             room.addUser(username);
-            socket.sendMessage("joinRoom:success;" + requestToken + ";");
+            socket.sendMessage("joinRoom:success;" + requestToken + ";" + roomId + ";" + username + ";");
 
         } else {
             socket.sendMessage("joinRoom:fail;" + requestToken + ";");
@@ -114,7 +119,7 @@ public class Main {
                 .collect(Collectors.toList()).get(0);
 
         room.removeUser(username);
-        socket.sendMessage("leaveRoom:success;" + requestToken + ";");
+        socket.sendMessage("leaveRoom:success;" + requestToken + ";" + roomId + ";" + username + ";");
     }
 
     public static void showRoomInfo(String[] requestVars) throws Exception {
@@ -141,6 +146,6 @@ public class Main {
                 .collect(Collectors.toList()).get(0);
 
         room.addMessage(username + ": " + message);
-        socket.sendMessage("sendMessage:success;" + requestToken + ";");
+        socket.sendMessage("sendMessage:success;" + requestToken + ";" + roomId + ";" + username + ";" + message + ";");
     }
 }

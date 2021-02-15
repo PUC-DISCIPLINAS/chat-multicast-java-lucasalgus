@@ -15,6 +15,9 @@ public class ChatWindow {
 	JButton leaveButton;
 	JButton sendButton;
 
+	DefaultListModel<String> usersListModel;
+	DefaultListModel<String> messagesListModel;
+
 	JList<String> usersList;
 	JList<String> messagesList;
 
@@ -61,23 +64,46 @@ public class ChatWindow {
 		});
 	}
 
+	public void addListeners() {
+		ClientController.addJoinRoomListener(vars -> {
+			var username = vars[1];
+
+			usersListModel.addElement(username);
+		});
+
+		ClientController.addLeaveRoomListener(vars -> {
+			var username = vars[1];
+
+			usersListModel.removeElement(username);
+		});
+
+		ClientController.addSendMessageListener(vars -> {
+			var username = vars[1];
+			var message = vars[2];
+
+			messagesListModel.addElement(username + ": " + message);
+		});
+	}
+
 	public void open() {
 		frame.setVisible(true);
 		ClientController.showRoomInfo(Client.currentRoom.getId(), room -> {
 			Client.currentRoom = room;
-			var usersModel = new DefaultListModel<String>();
+			usersListModel = new DefaultListModel<String>();
 			room.getUsers().forEach(user -> {
-				usersModel.addElement(user);
+				usersListModel.addElement(user);
 			});
 
-			usersList.setModel(usersModel);
+			usersList.setModel(usersListModel);
 
-			var messagesModel = new DefaultListModel<String>();
+			messagesListModel = new DefaultListModel<String>();
 			room.getMessages().forEach(message -> {
-				messagesModel.addElement(message);
+				messagesListModel.addElement(message);
 			});
 
-			messagesList.setModel(messagesModel);
+			messagesList.setModel(messagesListModel);
+
+			addListeners();
 		});
 	}
 

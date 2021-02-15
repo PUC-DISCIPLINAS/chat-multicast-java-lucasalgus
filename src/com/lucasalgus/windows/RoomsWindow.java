@@ -18,7 +18,8 @@ public class RoomsWindow {
 
     JButton connectButton;
     JButton createRoomButton;
-    JButton updateRoomsButton;
+
+    DefaultListModel<String> roomsListModel;
 
     JList<String> roomsList;
 
@@ -52,6 +53,7 @@ public class RoomsWindow {
                     JOptionPane.INFORMATION_MESSAGE
                 );
                 connectButton.setEnabled(false);
+                showRooms();
             } else {
                 frame.setTitle("Chat: <sem conexão>");
                 address = null;
@@ -84,20 +86,6 @@ public class RoomsWindow {
                     );
                 }
             });
-        });
-
-        updateRoomsButton.addActionListener(event -> {
-            if (address == null) {
-                JOptionPane.showMessageDialog(frame,
-                        "Informe o endereço de IP com a porta antes de visualizar as salas. (Exemplo: 228.5.6.7:6789)",
-                        "Erro!",
-                        JOptionPane.ERROR_MESSAGE
-                );
-
-                return;
-            }
-
-            showRooms();
         });
 
         roomsList.addMouseListener(new MouseAdapter() {
@@ -137,19 +125,28 @@ public class RoomsWindow {
                 }
             }
         });
+
+        ClientController.addCreateRoomListener(vars -> {
+            var roomId = Integer.parseInt(vars[0]);
+            addRoom(roomId);
+        });
     }
 
     private void showRooms() {
         ClientController.showRooms(rooms -> {
             Client.rooms = rooms;
-            var model = new DefaultListModel<String>();
+            roomsListModel = new DefaultListModel<String>();
 
             rooms.forEach(room -> {
-                model.addElement("Sala " + (room.getId() + 1));
+                roomsListModel.addElement("Sala " + (room.getId() + 1));
             });
 
-            roomsList.setModel(model);
+            roomsList.setModel(roomsListModel);
         });
+    }
+
+    private void addRoom(int roomId) {
+        roomsListModel.addElement("Sala " + (roomId + 1));
     }
 
     private JPanel mainPanel() {
@@ -180,11 +177,9 @@ public class RoomsWindow {
     private JPanel roomButtons() {
         var panel = new JPanel();
         createRoomButton = new JButton("Criar nova sala");
-        updateRoomsButton = new JButton("Atualizar Lista");
 
         panel.setLayout(new BoxLayout(panel, BoxLayout.LINE_AXIS));
         panel.add(createRoomButton);
-        panel.add(updateRoomsButton);
 
         return panel;
     }

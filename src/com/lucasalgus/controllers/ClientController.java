@@ -1,5 +1,6 @@
 package com.lucasalgus.controllers;
 
+import com.lucasalgus.Client;
 import com.lucasalgus.MulticastConnection;
 import com.lucasalgus.model.Listener;
 import com.lucasalgus.model.Room;
@@ -12,16 +13,22 @@ public class ClientController {
     static MulticastConnection connection;
 
     static String currentToken;
-    static Listener currentListener;
+
+    static Listener responseListener;
+
+	static Listener<String[]> createRoom;
+	static Listener<String[]> joinRoom;
+	static Listener<String[]> leaveRoom;
+	static Listener<String[]> sendMessage;
 
     public static void initializeListener() {
 		connection.listen(message -> {
 			var token = MessageUtils.getTokenFromRequest(message);
 			var identifier = MessageUtils.getIdentifierFromRequest(message);
+			var vars = MessageUtils.getVarsFromRequest(message);
 
 			if (token != null && token.equals(currentToken)) {
 				var status = MessageUtils.getStatusFromRequest(message);
-				var vars = MessageUtils.getVarsFromRequest(message);
 
 				if (status == null) {
 					return;
@@ -30,27 +37,66 @@ public class ClientController {
 				switch (identifier) {
 					case "createRoom":
 						createRoomResponse(status.equals("success"));
+						createRoomReceived(vars);
 						break;
 					case "showRooms":
 						showRoomsResponse(vars);
 						break;
 					case "joinRoom":
 						joinRoomResponse(status.equals("success"));
+						joinRoomReceived(vars);
 						break;
 					case "leaveRoom":
 						leaveRoomResponse(status.equals("success"));
+						leaveRoomReceived(vars);
 						break;
 					case "showRoomInfo":
 						showRoomInfoResponse(vars);
 						break;
 					case "sendMessage":
 						sendMessageResponse(status.equals("success"));
+						sendMessageReceived(vars);
 						break;
-					default:
+				}
+			} else {
+				var status = MessageUtils.getStatusFromRequest(message);
+
+				if (status == null || !status.equals("success")) {
+					return;
+				}
+
+				switch(identifier) {
+					case "createRoom":
+						createRoomReceived(vars);
+						break;
+					case "joinRoom":
+						joinRoomReceived(vars);
+						break;
+					case "leaveRoom":
+						leaveRoomReceived(vars);
+						break;
+					case "sendMessage":
+						sendMessageReceived(vars);
 						break;
 				}
 			}
 		});
+	}
+
+	public static void addCreateRoomListener(Listener<String[]> listener) {
+		createRoom = listener;
+	}
+
+	public static void addJoinRoomListener(Listener<String[]> listener) {
+		joinRoom = listener;
+	}
+
+	public static void addLeaveRoomListener(Listener<String[]> listener) {
+		leaveRoom = listener;
+	}
+
+	public static void addSendMessageListener(Listener<String[]> listener) {
+		sendMessage = listener;
 	}
 
     public static boolean connect(String address) {
@@ -72,14 +118,14 @@ public class ClientController {
     		connection.sendMessage(request);
 
     		currentToken = token;
-    		currentListener = listener;
+    		responseListener = listener;
 		} catch(Exception e) {
     		listener.callback(false);
 		}
 	}
 
 	public static void createRoomResponse(Boolean success) {
-		currentListener.callback(success);
+		responseListener.callback(success);
 	}
 
 	public static void showRooms(Listener<ArrayList<Room>> listener) {
@@ -90,7 +136,7 @@ public class ClientController {
 			connection.sendMessage(request);
 
 			currentToken = token;
-			currentListener = listener;
+			responseListener = listener;
 		} catch(Exception e) {
 			listener.callback(null);
 		}
@@ -103,7 +149,7 @@ public class ClientController {
 			rooms.add(new Room(Integer.parseInt(roomId)));
 		}
 
-		currentListener.callback(rooms);
+		responseListener.callback(rooms);
 	}
 
 	public static void joinRoom(int roomId, String username, Listener<Boolean> listener) {
@@ -114,14 +160,14 @@ public class ClientController {
 			connection.sendMessage(request);
 
 			currentToken = token;
-			currentListener = listener;
+			responseListener = listener;
 		} catch(Exception e) {
 			listener.callback(null);
 		}
 	}
 
 	public static void joinRoomResponse(Boolean success) {
-    	currentListener.callback(success);
+    	responseListener.callback(success);
 	}
 
 	public static void leaveRoom(int roomId, String username, Listener<Boolean> listener) {
@@ -132,14 +178,14 @@ public class ClientController {
 			connection.sendMessage(request);
 
 			currentToken = token;
-			currentListener = listener;
+			responseListener = listener;
 		} catch(Exception e) {
 			listener.callback(null);
 		}
 	}
 
 	public static void leaveRoomResponse(Boolean success) {
-    	currentListener.callback(success);
+    	responseListener.callback(success);
 	}
 
 	public static void showRoomInfo(int roomId, Listener<Room> listener) {
@@ -150,7 +196,7 @@ public class ClientController {
 			connection.sendMessage(request);
 
 			currentToken = token;
-			currentListener = listener;
+			responseListener = listener;
 		} catch(Exception e) {
 			listener.callback(null);
 		}
@@ -178,7 +224,7 @@ public class ClientController {
 			}
 		}
 
-		currentListener.callback(new Room(roomId, users, messages));
+		responseListener.callback(new Room(roomId, users, messages));
 	}
 
 	public static void sendMessage(int roomId, String username, String message, Listener<Boolean> listener) {
@@ -189,13 +235,57 @@ public class ClientController {
 			connection.sendMessage(request);
 
 			currentToken = token;
-			currentListener = listener;
+			responseListener = listener;
 		} catch(Exception e) {
 			listener.callback(null);
 		}
 	}
 
 	public static void sendMessageResponse(Boolean success) {
-		currentListener.callback(success);
+		responseListener.callback(success);
+	}
+
+	public static void createRoomReceived(String[] vars) {
+    	if (createRoom == null) {
+    		return;
+		}
+
+    	createRoom.callback(vars);
+	}
+
+	public static void joinRoomReceived(String[] vars) {
+    	if (joinRoom == null) {
+    		return;
+		}
+
+		var roomId = Integer.parseInt(vars[0]);
+
+		if (Client.currentRoom.getId() == roomId) {
+			joinRoom.callback(vars);
+		}
+	}
+
+	public static void leaveRoomReceived(String[] vars) {
+    	if (leaveRoom == null) {
+    		return;
+		}
+
+		var roomId = Integer.parseInt(vars[0]);
+
+		if (Client.currentRoom.getId() == roomId) {
+			leaveRoom.callback(vars);
+		}
+	}
+
+	public static void sendMessageReceived(String[] vars) {
+    	if (sendMessage == null) {
+    		return;
+		}
+
+		var roomId = Integer.parseInt(vars[0]);
+
+		if (Client.currentRoom.getId() == roomId) {
+			sendMessage.callback(vars);
+		}
 	}
 }
