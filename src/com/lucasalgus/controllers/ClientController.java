@@ -17,10 +17,10 @@ public class ClientController {
     public static void initializeListener() {
 		connection.listen(message -> {
 			var token = MessageUtils.getTokenFromRequest(message);
+			var identifier = MessageUtils.getIdentifierFromRequest(message);
 
 			if (token != null && token.equals(currentToken)) {
 				var status = MessageUtils.getStatusFromRequest(message);
-				var identifier = MessageUtils.getIdentifierFromRequest(message);
 				var vars = MessageUtils.getVarsFromRequest(message);
 
 				if (status == null) {
@@ -39,6 +39,12 @@ public class ClientController {
 						break;
 					case "leaveRoom":
 						leaveRoomResponse(status.equals("success"));
+						break;
+					case "showRoomInfo":
+						showRoomInfoResponse(vars);
+						break;
+					case "sendMessage":
+						sendMessageResponse(status.equals("success"));
 						break;
 					default:
 						break;
@@ -74,8 +80,6 @@ public class ClientController {
 
 	public static void createRoomResponse(Boolean success) {
 		currentListener.callback(success);
-		currentListener = null;
-		currentToken = null;
 	}
 
 	public static void showRooms(Listener<ArrayList<Room>> listener) {
@@ -100,8 +104,6 @@ public class ClientController {
 		}
 
 		currentListener.callback(rooms);
-		currentListener = null;
-		currentToken = null;
 	}
 
 	public static void joinRoom(int roomId, String username, Listener<Boolean> listener) {
@@ -120,8 +122,6 @@ public class ClientController {
 
 	public static void joinRoomResponse(Boolean success) {
     	currentListener.callback(success);
-		currentListener = null;
-		currentToken = null;
 	}
 
 	public static void leaveRoom(int roomId, String username, Listener<Boolean> listener) {
@@ -140,7 +140,62 @@ public class ClientController {
 
 	public static void leaveRoomResponse(Boolean success) {
     	currentListener.callback(success);
-		currentListener = null;
-		currentToken = null;
+	}
+
+	public static void showRoomInfo(int roomId, Listener<Room> listener) {
+		try {
+			var request = MessageFactory.showRoomInfo(roomId);
+			var token = MessageUtils.getTokenFromRequest(request);
+
+			connection.sendMessage(request);
+
+			currentToken = token;
+			currentListener = listener;
+		} catch(Exception e) {
+			listener.callback(null);
+		}
+	}
+
+	public static void showRoomInfoResponse(String[] roomVars) {
+    	var roomId = Integer.parseInt(roomVars[0]);
+    	var users = new ArrayList<String>();
+    	var messages = new ArrayList<String>();
+
+    	var roomUsersCountIndex = 1;
+    	var roomUsersCount = Integer.parseInt(roomVars[roomUsersCountIndex]);
+
+    	var roomMessagesCountIndex = 2 + roomUsersCount;
+
+    	for (int i = 0; i < roomVars.length; i++) {
+    		var element = roomVars[i];
+
+    		if (i > roomMessagesCountIndex) {
+				messages.add(element);
+				continue;
+			}
+    		if (i > roomUsersCountIndex && i < roomMessagesCountIndex) {
+    			users.add(element);
+			}
+		}
+
+		currentListener.callback(new Room(roomId, users, messages));
+	}
+
+	public static void sendMessage(int roomId, String username, String message, Listener<Boolean> listener) {
+		try {
+			var request = MessageFactory.sendMessage(roomId, username, message);
+			var token = MessageUtils.getTokenFromRequest(request);
+
+			connection.sendMessage(request);
+
+			currentToken = token;
+			currentListener = listener;
+		} catch(Exception e) {
+			listener.callback(null);
+		}
+	}
+
+	public static void sendMessageResponse(Boolean success) {
+		currentListener.callback(success);
 	}
 }

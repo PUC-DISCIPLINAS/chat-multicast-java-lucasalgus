@@ -20,4 +20,12 @@ public class MessageFactory {
     public static String leaveRoom(int roomId, String username) {
         return "leaveRoom;" + generateToken() + ";" + roomId + ";" + username + ";";
     }
+
+    public static String showRoomInfo(int roomId) {
+        return "showRoomInfo;" + generateToken() + ";" + roomId + ";";
+    }
+
+    public static String sendMessage(int roomId, String username, String message) {
+        return "sendMessage;" + generateToken() + ";" + roomId + ";" + username + ";" + message + ";";
+    }
 }

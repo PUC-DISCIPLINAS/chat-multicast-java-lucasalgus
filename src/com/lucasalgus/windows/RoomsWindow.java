@@ -104,7 +104,6 @@ public class RoomsWindow {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    roomsList.setEnabled(false);
 
                     var index = roomsList.locationToIndex(e.getPoint());
                     var id = index;
@@ -117,7 +116,6 @@ public class RoomsWindow {
                     );
 
                     if (username == null) {
-                        roomsList.setEnabled(true);
                         return;
                     }
 
@@ -128,8 +126,6 @@ public class RoomsWindow {
                             Client.chatWindow.open();
 
                         } else {
-                            roomsList.setEnabled(true);
-
                             JOptionPane.showMessageDialog(frame,
                                     "Ocorreu um erro ao entrar na sala. Tente novamente com um nome de usuário diferente e se o erro persisitir, verifique se o servidor está online.",
                                     "Erro!",

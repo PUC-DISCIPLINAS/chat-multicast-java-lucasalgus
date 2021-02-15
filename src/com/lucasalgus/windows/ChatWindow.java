@@ -11,8 +11,12 @@ import java.awt.event.WindowEvent;
 public class ChatWindow {	
 	JFrame frame;
 
+	JTextField messagesTextField;
 	JButton leaveButton;
 	JButton sendButton;
+
+	JList<String> usersList;
+	JList<String> messagesList;
 
 	public ChatWindow() {
 		frame = new JFrame("Sala 1");
@@ -26,8 +30,6 @@ public class ChatWindow {
 	}
 
 	public void bindEvents() {
-		var that = this;
-
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent windowEvent) {
@@ -42,10 +44,41 @@ public class ChatWindow {
 				this.close();
 			});
 		});
+
+		sendButton.addActionListener(event -> {
+			if (messagesTextField.getText().length() == 0 ) {
+				return;
+			}
+
+			ClientController.sendMessage(
+				Client.currentRoom.getId(),
+				Client.username,
+				messagesTextField.getText(),
+				success -> {
+					messagesTextField.setText("");
+				}
+			);
+		});
 	}
 
 	public void open() {
 		frame.setVisible(true);
+		ClientController.showRoomInfo(Client.currentRoom.getId(), room -> {
+			Client.currentRoom = room;
+			var usersModel = new DefaultListModel<String>();
+			room.getUsers().forEach(user -> {
+				usersModel.addElement(user);
+			});
+
+			usersList.setModel(usersModel);
+
+			var messagesModel = new DefaultListModel<String>();
+			room.getMessages().forEach(message -> {
+				messagesModel.addElement(message);
+			});
+
+			messagesList.setModel(messagesModel);
+		});
 	}
 
 	public void close() {
@@ -98,8 +131,8 @@ public class ChatWindow {
 
 	private JPanel messageInputPanel() {
 		var panel = new JPanel();
-		var messagesTextField = new JTextField();
-		var sendButton = new JButton("Enviar");
+		messagesTextField = new JTextField();
+		sendButton = new JButton("Enviar");
 		
 		panel.setMaximumSize(new DimensionUIResource(999999, 20));
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
@@ -110,16 +143,16 @@ public class ChatWindow {
 		return panel;
 	}
 
-	private JTextArea messagesTextArea() {
-		var component = new JTextArea("test");
-		component.setEditable(false);
+	private JScrollPane messagesTextArea() {
+		messagesList = new JList<>();
+		var listScroller = new JScrollPane(messagesList);
 
-		return component;
+		return listScroller;
 	}
 
 	private JScrollPane userListScrollPane() {
-		var list = new JList<>(new String[]{"test", "test1"});
-		var listScroller = new JScrollPane(list);
+		usersList = new JList<>();
+		var listScroller = new JScrollPane(usersList);
 
 		return listScroller;
 	}

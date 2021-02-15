@@ -15,6 +15,12 @@ public class Room {
 		this.messages = new ArrayList<>();
 	}
 
+	public Room(int id, ArrayList<String> users, ArrayList<String> messages) {
+		this.id = id;
+		this.users = users;
+		this.messages = messages;
+	}
+
 	public int getId() {
 		return id;
 	}
@@ -42,6 +48,14 @@ public class Room {
 			.collect(Collectors.toCollection(ArrayList<String>::new));
 
 		this.users = filteredUsers;
+	}
+
+	public ArrayList<String> getUsers() {
+		return this.users;
+	}
+
+	public ArrayList<String> getMessages() {
+		return this.messages;
 	}
 
 	public void addMessage(String message) {
