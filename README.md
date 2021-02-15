@@ -30,7 +30,7 @@ Como foi mencionado na introdução, a comunicação da aplicação ocorre pelo 
 
 Foi desenvolvido um diagrama de relações entre as classes:
 
-![classDiagram](https://user-images.githubusercontent.com/35220979/107996226-a6552780-6fbe-11eb-95ab-ebdf94be7aa6.png)
+![classDiagram](https://user-images.githubusercontent.com/35220979/107996285-cc7ac780-6fbe-11eb-84e4-ca6e014d9d9d.png)
 
 > Figura 2: Diagrama de Classes
 
