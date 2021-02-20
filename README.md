@@ -8,6 +8,11 @@
 # 1. Introdução
 Este trabalho consiste em uma aplicação de chat desenvolvida com a linguagem Java, utilizando o protocolo Multicast para a comunicação entre cliente e servidor. A GUI da aplicação foi desenvolvida com a biblioteca Swing do Java.
 
+## 1.1 Instruções para executar a aplicação
+1. Compilar e executar a classe Main.java (servidor)
+2. Compilar e executar a classe Client.java (cliente)
+3. Conectar as duas no mesmo IP multicast (o servidor pedirá o IP no Terminal, enquanto o cliente possui uma UI para a entrada do dado)
+
 # 2. Requisitos
 Os requisitos básicos para a aplicação são os seguintes:
 
